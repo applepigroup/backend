@@ -16,7 +16,7 @@ con.connect(function(err){
     if(err)
     {
         console.log(err);
-        return;
+        throw err;
     }
     console.log("connected");
 });
@@ -42,6 +42,7 @@ router.post('/',(req,res)=>{
             if(error)
             {
                 console.log("error occured");
+                throw error;
             }
             else
             {
