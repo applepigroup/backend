@@ -1,9 +1,8 @@
 var express = require("express"); 
 var mysql = require('mysql');
 var bodyparser = require('body-parser')
+var router = express.Router();
 var app = express();
-
-var jsonparser = bodyparser.json({type:'application/json'});
 
 var con = mysql.createConnection({
     host:'localhost',
@@ -22,7 +21,10 @@ con.connect(function(err){
     console.log("connected");
 });
 
-app.post('/',jsonparser,(req,res)=>{
+app.use(bodyparser.json());
+app.use(router);
+
+router.post('/',(req,res)=>{
     console.log(req.body.refid);
     var referenceid=  req.body.refid;
     var lectureid = req.body.lecid;
@@ -58,4 +60,6 @@ app.post('/',jsonparser,(req,res)=>{
         })
     }
 });
-app.listen(3000);
+app.listen(process.env.PORT || 4000,()=>{
+    console.log("listening to port 4000")
+});
