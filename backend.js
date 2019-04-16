@@ -1,4 +1,4 @@
-var express = require("express"); 
+ var express = require("express"); 
 var mysql = require('mysql');
 var bodyparser = require('body-parser')
 var router = express.Router();
@@ -25,10 +25,8 @@ app.use(bodyparser.json());
 app.use(router);
 
 router.post('/',(req,res)=>{
-    console.log(req.body.refid);
-    var referenceid=  req.body.refid;
-    var lectureid = req.body.lecid;
-
+    
+    const{referenceid,lectureid} = req.body;
     if(referenceid === '' || lectureid === '')
     {
         console.log("Enter details to login")
