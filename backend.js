@@ -1,25 +1,13 @@
-const express = require("express"); 
-const mysql = require('mysql');
-const bodyparser = require('body-parser')
+const express = require('express');
+const con = require('./database')
 const jwt = require('jsonwebtoken');
 const keys = require('./keys')
 const router = express.Router();
 
-const app = express();
-
-var con = mysql.createConnection({
-    host:'localhost',
-    port:3306,
-    user:'root',
-    password:'',
-    database:'students'
-});
-
-app.use(bodyparser.json());
 
 router.post('/login',(req,res)=>{
-    let referenceid = req.body.refid;
-    let lectureid = req.body.lecid;
+    var referenceid = req.body.refid;
+    var lectureid = req.body.lecid;
     console.log(referenceid);
     console.log(lectureid)
     if(referenceid === '' || lectureid === '')
@@ -38,6 +26,7 @@ router.post('/login',(req,res)=>{
             }
             if(results.length === 1)
             {
+                 var msg = "Login successful";
                  let token = jwt.sign({referenceid,lectureid},keys.secret);
                  res.status(200).json({token:token});
                  //console.log(msg);
@@ -48,9 +37,8 @@ router.post('/login',(req,res)=>{
                  //console.log("wrong credentials");
             }
             
-        });
+        })
     }
 });
-app.listen(process.env.PORT || 4000,()=>{
-    console.log("listening to port 4000")
-});
+
+module.exports = router;
