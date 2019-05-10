@@ -1,0 +1,50 @@
+const express = require("express");
+const con = require('./database')
+
+var app = express();
+var router = express.Router();
+
+router.post('/register',(req,res)=>{
+    var firstname = req.body.firstname;
+    var surname = req.body.surname;
+    var referid = req.body.referenceid;
+    var indexnumber = req.body.indexnumber;
+    var lectureid = req.body.lectureid;
+    var referidint = parseInt(referid);
+    
+    if(firstname === '' || surname === ''|| referid === '' || indexnumber === ''|| lectureid === '')
+    {
+        res.send("Complete all fields");
+    }
+    else
+    {
+        query_reg1 = "select referenceid , lectureid from studentdetails where referenceid = ? and lectureid = ?";
+        con.query(query_reg1,[referid,lectureid],(error,results)=>{
+            if(error)
+            {
+                throw error;
+            }
+            if(results.length === 1)
+            {
+                if(results[0].referenceid === referidint && results[0].lectureid === lectureid)
+                {
+                    //console.log('credentials already exists')
+                    res.send("The reference id and lecture id already exist. check reference id and lecture id well");
+                }
+            }
+            else if(results.length === 0){
+                query_reg2 = "insert into studentdetails (indexnumber,firstname,surname,referenceid,lectureid) values (?,?,?,?,?)";
+                con.query(query_reg2,[indexnumber,firstname,surname,referid,lectureid],(error)=>{
+                    if(error)
+                    {
+                        console.log(error);
+                        return;
+                    }
+                    console.log("you have successfully joined a class");
+                    res.status(200).send("you have join a class");
+                })
+            }
+        })
+    }
+})
+module.exports = router;
