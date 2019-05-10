@@ -1,37 +1,17 @@
-var express = require("express"); 
-var mysql = require('mysql');
-var bodyparser = require('body-parser')
-var router = express.Router();
-var app = express();
+const express = require('express');
+const con = require('./database')
+const jwt = require('jsonwebtoken');
+const keys = require('./keys')
+const router = express.Router();
 
-var con = mysql.createConnection({
-    host:'localhost',
-    port:3306,
-    user:'root',
-    password:'',
-    database:'students'
-}) 
 
-con.connect(function(err){
-    if(err)
-    {
-        console.log(err);
-        return;
-    }
-    console.log("connected");
-});
-
-app.use(bodyparser.json());
-app.use(router);
-
-router.post('/',(req,res)=>{
-    console.log(req.body.refid);
-    var referenceid=  req.body.refid;
+router.post('/login',(req,res)=>{
+    var referenceid = req.body.refid;
     var lectureid = req.body.lecid;
-
+    console.log(referenceid);
+    console.log(lectureid)
     if(referenceid === '' || lectureid === '')
     {
-        console.log("Enter details to login")
         res.send('Please Enter details to login')
     }
     else
@@ -41,25 +21,24 @@ router.post('/',(req,res)=>{
         {
             if(error)
             {
+                throw error;
                 console.log("error occured");
             }
-            else
+            if(results.length === 1)
             {
-                if(results.length == 1)
-                {
-                    var msg = "Login successful";
-                    res.send("1");
-                    console.log(msg);
-                }
-                else 
-                {
-                    res.send("wrong credentials");
-                    console.log("wrong credentials");
-                }
+                 var msg = "Login successful";
+                 let token = jwt.sign({referenceid,lectureid},keys.secret);
+                 res.status(200).json({token:token});
+                 //console.log(msg);
+             }
+             else 
+            {
+                 res.status(401).send("failed");
+                 //console.log("wrong credentials");
             }
+            
         })
     }
 });
-app.listen(process.env.PORT || 4000,()=>{
-    console.log("listening to port 4000")
-});
+
+module.exports = router;
