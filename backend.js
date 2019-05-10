@@ -1,8 +1,11 @@
- var express = require("express"); 
-var mysql = require('mysql');
-var bodyparser = require('body-parser')
-var router = express.Router();
-var app = express();
+const express = require("express"); 
+const mysql = require('mysql');
+const bodyparser = require('body-parser')
+const jwt = require('jsonwebtoken');
+const keys = require('./keys')
+const router = express.Router();
+
+const app = express();
 
 var con = mysql.createConnection({
     host:'localhost',
@@ -10,26 +13,17 @@ var con = mysql.createConnection({
     user:'root',
     password:'',
     database:'students'
-}) 
-
-con.connect(function(err){
-    if(err)
-    {
-        console.log(err);
-        throw err;
-    }
-    console.log("connected");
 });
 
 app.use(bodyparser.json());
-app.use(router);
 
-router.post('/',(req,res)=>{
-    
-    const{referenceid,lectureid} = req.body;
+router.post('/login',(req,res)=>{
+    let referenceid = req.body.refid;
+    let lectureid = req.body.lecid;
+    console.log(referenceid);
+    console.log(lectureid)
     if(referenceid === '' || lectureid === '')
     {
-        console.log("Enter details to login")
         res.send('Please Enter details to login')
     }
     else
@@ -39,24 +33,22 @@ router.post('/',(req,res)=>{
         {
             if(error)
             {
-                console.log("error occured");
                 throw error;
+                console.log("error occured");
             }
-            else
+            if(results.length === 1)
             {
-                if(results.length == 1)
-                {
-                    var msg = "Login successful";
-                    res.send("1");
-                    console.log(msg);
-                }
-                else 
-                {
-                    res.send("wrong credentials");
-                   
-                }
+                 let token = jwt.sign({referenceid,lectureid},keys.secret);
+                 res.status(200).json({token:token});
+                 //console.log(msg);
+             }
+             else 
+            {
+                 res.status(401).send("failed");
+                 //console.log("wrong credentials");
             }
-        })
+            
+        });
     }
 });
 app.listen(process.env.PORT || 4000,()=>{
